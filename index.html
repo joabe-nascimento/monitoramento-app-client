@@ -1,0 +1,48 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <link rel="shortcut icon" href="./assets/favicon.ico" type="image/x-icon" />
+    <title>Grupo Nobre - Validador de Sites</title>
+    <link rel="stylesheet" href="styles.css" />
+  </head>
+  
+  <body>
+    <nav>
+      <img src="./assets/gn_branca_curta.png" alt="logo-gn" id="imagem-gn" />
+    </nav>
+
+    <div class="container">
+      <table id="siteTable">
+        <thead>
+          <tr>
+            <th id="site">Site</th>
+            <th id="status">Status</th>
+          </tr>
+        </thead>
+        <tbody id="siteTableBody">
+        
+        </tbody>
+      </table>
+
+      <form id="addLinkForm">
+        <input
+          type="text"
+          id="linkInput"
+          placeholder="Insira um novo link"
+          required
+        />
+        <button type="submit">Add Link</button>
+      </form>
+    </div>
+
+    <footer>
+      <p id="copy">
+        &copy; 2024 T.I da União Médica. Todos os direitos reservados.
+      </p>
+    </footer>
+
+    <script src="scripts.js"></script>
+  </body>
+</html>
