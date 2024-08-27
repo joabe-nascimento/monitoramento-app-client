@@ -74,7 +74,7 @@ async function addLink(event) {
 
     try {
         // Faz uma requisição POST para adicionar o novo link
-        const response = await fetch('http://localhost:3001/addLink', {
+        const response = await fetch('https://monitoramento-sites-api.onrender.com/addLink', {
             method: 'POST',
             headers: {
                 'Content-Type': 'application/json'
