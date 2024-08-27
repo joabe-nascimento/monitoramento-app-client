@@ -1,18 +1,10 @@
-// Se estiver usando Node.js, instale e importe o node-fetch
-// const fetch = require('node-fetch');
-
 // Função assíncrona para enviar mensagens ao Telegram
 async function sendTelegramMessage(message) {
-    const telegramBotToken = process.env.TELEGRAM_BOT_TOKEN;
-    const telegramChatId = process.env.TELEGRAM_CHAT_ID;
-
-    if (!telegramBotToken || !telegramChatId) {
-        console.error('Variáveis de ambiente do Telegram não estão definidas.');
-        return;
-    }
+    const telegramBotToken = "7472348745:AAGMqF50_Q4TAWyQgeJySb0tG-njguiJmrI";
+    const telegramChatId = "-1002155037998";
 
     try {
-        const response = await fetch(`https://api.telegram.org/bot${telegramBotToken}/sendMessage`, {
+        await fetch(`https://api.telegram.org/bot${telegramBotToken}/sendMessage`, {
             method: 'POST',
             headers: {
                 'Content-Type': 'application/json'
@@ -22,14 +14,9 @@ async function sendTelegramMessage(message) {
                 text: message
             })
         });
-
-        if (response.ok) {
-            console.log('Mensagem enviada para o grupo do Telegram com sucesso.');
-        } else {
-            console.error('Erro ao enviar mensagem para o grupo do Telegram:', response.statusText);
-        }
+        console.log('Mensagem enviada para o grupo do Telegram com sucesso.');
     } catch (error) {
-        console.error('Erro ao enviar mensagem para o grupo do Telegram:', error.message);
+        console.error('Erro ao enviar mensagem para o grupo do Telegram:', error);
     }
 }
 
@@ -38,11 +25,6 @@ async function fetchSitesStatus() {
     try {
         // Faz uma requisição para o backend para obter o status dos sites
         const response = await fetch('https://monitoramento-sites-api.onrender.com/checkSites');
-
-        // Verifica se a resposta foi bem-sucedida
-        if (!response.ok) {
-            throw new Error('Erro ao obter status dos sites: ' + response.statusText);
-        }
 
         // Converte a resposta para JSON
         const data = await response.json();
@@ -79,7 +61,7 @@ async function fetchSitesStatus() {
         });
     } catch (error) {
         // Exibe um erro no console se houver problemas ao obter os dados
-        console.error('Erro ao obter status dos sites:', error.message);
+        console.error('Erro ao obter status dos sites:', error);
     }
 }
 
@@ -112,7 +94,7 @@ async function addLink(event) {
             alert('Erro ao adicionar o link. Tente novamente.');
         }
     } catch (error) {
-        console.error('Erro ao adicionar link:', error.message);
+        console.error('Erro ao adicionar link:', error);
         alert('Erro ao adicionar o link. Tente novamente.');
     }
 }
@@ -123,5 +105,5 @@ document.getElementById('addLinkForm').addEventListener('submit', addLink);
 // Executa a função fetchSitesStatus imediatamente ao carregar a página
 fetchSitesStatus();
 
-// Verifica o status dos sites a cada 2 minutos (120000 milissegundos)
+// Verifica o status dos sites a cada 2 minutos
 setInterval(fetchSitesStatus, 2 * 60 * 1000);
