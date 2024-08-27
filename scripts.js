@@ -24,7 +24,7 @@ async function sendTelegramMessage(message) {
 async function fetchSitesStatus() {
     try {
         // Faz uma requisição para o backend para obter o status dos sites
-        const response = await fetch('http://localhost:3001/checkSites');
+        const response = await fetch('https://monitoramento-sites-api.onrender.com/checkSites');
 
         // Converte a resposta para JSON
         const data = await response.json();
