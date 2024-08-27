@@ -24,7 +24,7 @@ async function sendTelegramMessage(message) {
 async function fetchSitesStatus() {
     try {
         // Faz uma requisição para o backend para obter o status dos sites
-        const response = await fetch('https://monitoramento-sites-api.onrender.com/checkSites');
+        const response = await fetch('http://localhost:3001/checkSites');
 
         // Converte a resposta para JSON
         const data = await response.json();
@@ -74,7 +74,7 @@ async function addLink(event) {
 
     try {
         // Faz uma requisição POST para adicionar o novo link
-        const response = await fetch('https://monitoramento-sites-api.onrender.com/addLink', {
+        const response = await fetch('http://localhost:3001/addLink', {
             method: 'POST',
             headers: {
                 'Content-Type': 'application/json'
@@ -105,5 +105,5 @@ document.getElementById('addLinkForm').addEventListener('submit', addLink);
 // Executa a função fetchSitesStatus imediatamente ao carregar a página
 fetchSitesStatus();
 
-// Verifica o status dos sites a cada 2 minutos
+// Verifica o status dos sites a cada 5 minutos
 setInterval(fetchSitesStatus, 2 * 60 * 1000);
