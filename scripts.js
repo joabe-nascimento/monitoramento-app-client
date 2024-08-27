@@ -106,4 +106,4 @@ document.getElementById('addLinkForm').addEventListener('submit', addLink);
 fetchSitesStatus();
 
 // Verifica o status dos sites a cada 5 minutos
-setInterval(fetchSitesStatus, 2 * 60 * 1000);
+setInterval(fetchSitesStatus, 5 * 60 * 1000);
