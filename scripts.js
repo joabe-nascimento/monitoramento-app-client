@@ -1,8 +1,4 @@
-const ALERT_DELAY_10_MINUTES = 10 * 60 * 1000;
-const ALERT_DELAY_30_MINUTES = 30 * 60 * 1000;
-const OSCILLATION_TIME_FRAME = 5 * 60 * 1000;
-const siteStatusTimes = {};
-
+// Função assíncrona para enviar mensagens ao Telegram
 async function sendTelegramMessage(message) {
     const telegramBotToken = "7472348745:AAGMqF50_Q4TAWyQgeJySb0tG-njguiJmrI";
     const telegramChatId = "-1002155037998";
@@ -24,99 +20,60 @@ async function sendTelegramMessage(message) {
     }
 }
 
-async function checkSiteStatus(url) {
-    const timeout = 5000;
-    const controller = new AbortController();
-    const timeoutId = setTimeout(() => controller.abort(), timeout);
-
-    try {
-        const response = await fetch(url, { signal: controller.signal });
-        clearTimeout(timeoutId);
-
-        if (response.ok) {
-            return 'Online';
-        } else {
-            return 'Offline';
-        }
-    } catch (error) {
-        if (error.name === 'AbortError') {
-            return 'Lento';
-        } else {
-            console.error(`Erro ao verificar o site ${url}:`, error);
-            return 'Offline';
-        }
-    }
-}
-
+// Função assíncrona para buscar e atualizar o status dos sites
 async function fetchSitesStatus() {
     try {
+        // Faz uma requisição para o backend para obter o status dos sites
         const response = await fetch('https://monitoramento-sites-api.onrender.com/checkSites');
+
+        // Converte a resposta para JSON
         const data = await response.json();
 
+        // Obtém a referência do corpo da tabela onde os dados serão exibidos
         const siteTableBody = document.getElementById('siteTableBody');
+
+        // Limpa o conteúdo anterior da tabela antes de atualizar com os novos resultados
         siteTableBody.innerHTML = '';
 
-        for (const site of data) {
-            const status = await checkSiteStatus(site.url);
-            let statusClass = '';
-
-            const now = Date.now();
-            const previousStatusData = siteStatusTimes[site.url];
-
-            if (previousStatusData) {
-                const previousStatus = previousStatusData.status;
-
-                if (status !== previousStatus) {
-                    if (now - previousStatusData.time <= OSCILLATION_TIME_FRAME) {
-                        statusClass = 'status-yellow';
-                        siteStatusTimes[site.url] = { status: 'Oscilando', time: now };
-                    } else {
-                        statusClass = status === 'Online' ? 'status-green' : status === 'Offline' ? 'status-red' : 'status-yellow';
-                        siteStatusTimes[site.url] = { status: status, time: now };
-                    }
-                } else {
-                    statusClass = previousStatus === 'Online' ? 'status-green' : previousStatus === 'Offline' ? 'status-red' : 'status-yellow';
-                }
-            } else {
-                statusClass = status === 'Online' ? 'status-green' : status === 'Offline' ? 'status-red' : 'status-yellow';
-                siteStatusTimes[site.url] = { status: status, time: now };
-            }
-
+        // Preenche a tabela com os resultados obtidos do backend
+        data.forEach(site => {
+            // Cria uma nova linha na tabela
             const row = document.createElement('tr');
+
+            // Define a classe de estilo com base no status do site
+            const statusClass = site.status === 'Online' ? 'status-green' : 'status-red';
+
+            // Insere os dados do site na linha criada
             row.innerHTML = `
-                <td>${site.url}</td>
-                <td>
+                <td id="tabela-site">${site.url}</td>
+                <td id="tabela-status">
                     <span class="status-dot ${statusClass}"></span>
-                    ${statusClass === 'status-yellow' ? 'Oscilando' : status}
+                    ${site.status}
                 </td>
             `;
+            // Adiciona a linha à tabela
             siteTableBody.appendChild(row);
 
-            if (status === 'Offline' || status === 'Lento') {
-                if (now - siteStatusTimes[site.url].time >= ALERT_DELAY_30_MINUTES) {
-                    sendTelegramMessage(`ALERTA CRÍTICO: O site ${site.url} está inacessível ou fora do ar há mais de 30 minutos!`);
-                    siteStatusTimes[site.url].time = now;
-                } else if (now - siteStatusTimes[site.url].time >= ALERT_DELAY_10_MINUTES) {
-                    sendTelegramMessage(`AVISO: O site ${site.url} está inacessível ou fora do ar há mais de 10 minutos.`);
-                    siteStatusTimes[site.url].time = now;
-                }
-            } else {
-                if (status === 'Online') {
-                    delete siteStatusTimes[site.url];
-                }
+            // Se o site estiver offline, envia uma mensagem de alerta
+            if (site.status === 'Offline') {
+                sendTelegramMessage(`ALERTA: O site ${site.url} está inacessível ou fora do ar!`);
             }
-        }
+        });
     } catch (error) {
+        // Exibe um erro no console se houver problemas ao obter os dados
         console.error('Erro ao obter status dos sites:', error);
     }
 }
 
+// Função assíncrona para adicionar um novo link
 async function addLink(event) {
-    event.preventDefault();
+    event.preventDefault(); // Previne o comportamento padrão do formulário
 
+    // Obtém o valor do input
     const linkInput = document.getElementById('linkInput').value;
 
     try {
+        // Faz uma requisição POST para adicionar o novo link
         const response = await fetch('https://monitoramento-sites-api.onrender.com/addLink', {
             method: 'POST',
             headers: {
@@ -126,8 +83,11 @@ async function addLink(event) {
         });
 
         if (response.ok) {
+            // Limpa o input
             document.getElementById('linkInput').value = '';
+            // Exibe um alerta de sucesso
             alert('Link cadastrado com sucesso!');
+            // Atualiza a tabela sem recarregar a página
             fetchSitesStatus();
         } else {
             console.error('Erro ao adicionar link:', response.statusText);
@@ -139,9 +99,14 @@ async function addLink(event) {
     }
 }
 
+// Adiciona um listener para o evento de submit do formulário
 document.getElementById('addLinkForm').addEventListener('submit', addLink);
 
+// Executa a função fetchSitesStatus imediatamente ao carregar a página
 fetchSitesStatus();
 
-const intervalMillis = 60000;
+// Intervalo para verificar o status dos sites (em milissegundos)
+const intervalMillis = 1000; // 1 segundo
+
+// Verifica o status dos sites com o intervalo de 1 segundo
 setInterval(fetchSitesStatus, intervalMillis);
