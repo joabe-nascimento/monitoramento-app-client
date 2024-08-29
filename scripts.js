@@ -1,3 +1,8 @@
+// Variáveis para armazenar o tempo de inatividade
+const ALERT_DELAY_10_MINUTES = 10 * 60 * 1000; // 10 minutos em milissegundos
+const ALERT_DELAY_30_MINUTES = 30 * 60 * 1000; // 30 minutos em milissegundos
+const siteStatusTimes = {}; // Armazena os tempos de inatividade dos sites
+
 // Função assíncrona para enviar mensagens ao Telegram
 async function sendTelegramMessage(message) {
     const telegramBotToken = "7472348745:AAGMqF50_Q4TAWyQgeJySb0tG-njguiJmrI";
@@ -68,10 +73,29 @@ async function fetchSitesStatus() {
             `;
             siteTableBody.appendChild(row);
 
-            if (status === 'Offline') {
-                sendTelegramMessage(`ALERTA: O site ${site.url} está inacessível ou fora do ar!`);
-            } else if (status === 'Lento') {
-                sendTelegramMessage(`AVISO: O site ${site.url} está carregando lentamente.`);
+            const now = Date.now();
+
+            if (status === 'Offline' || status === 'Lento') {
+                if (!siteStatusTimes[site.url]) {
+                    siteStatusTimes[site.url] = { status: status, time: now };
+                } else {
+                    const statusData = siteStatusTimes[site.url];
+                    if (statusData.status === status) {
+                        if (now - statusData.time >= ALERT_DELAY_30_MINUTES) {
+                            sendTelegramMessage(`ALERTA CRÍTICO: O site ${site.url} está inacessível ou fora do ar há mais de 30 minutos!`);
+                            statusData.time = now; // Atualiza o tempo para evitar múltiplos alertas
+                        } else if (now - statusData.time >= ALERT_DELAY_10_MINUTES) {
+                            sendTelegramMessage(`AVISO: O site ${site.url} está inacessível ou fora do ar há mais de 10 minutos.`);
+                            statusData.time = now; // Atualiza o tempo para evitar múltiplos alertas
+                        }
+                    } else {
+                        // Atualiza o status e o tempo quando há uma mudança
+                        siteStatusTimes[site.url] = { status: status, time: now };
+                    }
+                }
+            } else {
+                // Se o status do site voltar a ser "Online", remove o tempo de inatividade
+                delete siteStatusTimes[site.url];
             }
         }
     } catch (error) {
