@@ -105,8 +105,11 @@ document.getElementById('addLinkForm').addEventListener('submit', addLink);
 // Executa a função fetchSitesStatus imediatamente ao carregar a página
 fetchSitesStatus();
 
-// Intervalo para verificar o status dos sites (em milissegundos)
-const intervalMillis = 1000; // 1 segundo
+// Opções de intervalo: 5 minutos, 10 minutos ou 60 minutos
+const intervalOption = 10; // Altere este valor para 5, 10 ou 60
 
-// Verifica o status dos sites com o intervalo de 1 segundo
+// Define o intervalo com base na opção selecionada (em milissegundos)
+const intervalMillis = intervalOption * 60 * 1000;
+
+// Verifica o status dos sites com o intervalo selecionado
 setInterval(fetchSitesStatus, intervalMillis);
