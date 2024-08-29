@@ -20,60 +20,73 @@ async function sendTelegramMessage(message) {
     }
 }
 
+// Função para verificar o status de um site com tempo limite
+async function checkSiteStatus(url) {
+    const timeout = 5000; // Tempo limite de 5 segundos
+    const controller = new AbortController();
+    const timeoutId = setTimeout(() => controller.abort(), timeout);
+
+    try {
+        const response = await fetch(url, { signal: controller.signal });
+        clearTimeout(timeoutId);
+
+        if (response.ok) {
+            return 'Online';
+        } else {
+            return 'Offline';
+        }
+    } catch (error) {
+        if (error.name === 'AbortError') {
+            return 'Lento';
+        } else {
+            console.error(`Erro ao verificar o site ${url}:`, error);
+            return 'Offline';
+        }
+    }
+}
+
 // Função assíncrona para buscar e atualizar o status dos sites
 async function fetchSitesStatus() {
     try {
         // Faz uma requisição para o backend para obter o status dos sites
         const response = await fetch('https://monitoramento-sites-api.onrender.com/checkSites');
-
-        // Converte a resposta para JSON
         const data = await response.json();
 
-        // Obtém a referência do corpo da tabela onde os dados serão exibidos
         const siteTableBody = document.getElementById('siteTableBody');
-
-        // Limpa o conteúdo anterior da tabela antes de atualizar com os novos resultados
         siteTableBody.innerHTML = '';
 
-        // Preenche a tabela com os resultados obtidos do backend
-        data.forEach(site => {
-            // Cria uma nova linha na tabela
+        for (const site of data) {
+            const status = await checkSiteStatus(site.url);
+            const statusClass = status === 'Online' ? 'status-green' : status === 'Lento' ? 'status-yellow' : 'status-red';
+            
             const row = document.createElement('tr');
-
-            // Define a classe de estilo com base no status do site
-            const statusClass = site.status === 'Online' ? 'status-green' : 'status-red';
-
-            // Insere os dados do site na linha criada
             row.innerHTML = `
                 <td id="tabela-site">${site.url}</td>
                 <td id="tabela-status">
                     <span class="status-dot ${statusClass}"></span>
-                    ${site.status}
+                    ${status}
                 </td>
             `;
-            // Adiciona a linha à tabela
             siteTableBody.appendChild(row);
 
-            // Se o site estiver offline, envia uma mensagem de alerta
-            if (site.status === 'Offline') {
+            if (status === 'Offline') {
                 sendTelegramMessage(`ALERTA: O site ${site.url} está inacessível ou fora do ar!`);
+            } else if (status === 'Lento') {
+                sendTelegramMessage(`AVISO: O site ${site.url} está carregando lentamente.`);
             }
-        });
+        }
     } catch (error) {
-        // Exibe um erro no console se houver problemas ao obter os dados
         console.error('Erro ao obter status dos sites:', error);
     }
 }
 
 // Função assíncrona para adicionar um novo link
 async function addLink(event) {
-    event.preventDefault(); // Previne o comportamento padrão do formulário
+    event.preventDefault();
 
-    // Obtém o valor do input
     const linkInput = document.getElementById('linkInput').value;
 
     try {
-        // Faz uma requisição POST para adicionar o novo link
         const response = await fetch('https://monitoramento-sites-api.onrender.com/addLink', {
             method: 'POST',
             headers: {
@@ -83,11 +96,8 @@ async function addLink(event) {
         });
 
         if (response.ok) {
-            // Limpa o input
             document.getElementById('linkInput').value = '';
-            // Exibe um alerta de sucesso
             alert('Link cadastrado com sucesso!');
-            // Atualiza a tabela sem recarregar a página
             fetchSitesStatus();
         } else {
             console.error('Erro ao adicionar link:', response.statusText);
@@ -106,7 +116,7 @@ document.getElementById('addLinkForm').addEventListener('submit', addLink);
 fetchSitesStatus();
 
 // Intervalo para verificar o status dos sites (em milissegundos)
-const intervalMillis = 1000; // 1 segundo
+const intervalMillis = 60000; // 1 minuto
 
-// Verifica o status dos sites com o intervalo de 1 segundo
+// Verifica o status dos sites com o intervalo de 1 minuto
 setInterval(fetchSitesStatus, intervalMillis);
