@@ -1,10 +1,10 @@
-// Variáveis para armazenar o tempo de inatividade e status de oscilação
+// script.js
+
 const ALERT_DELAY_10_MINUTES = 10 * 60 * 1000; // 10 minutos em milissegundos
 const ALERT_DELAY_30_MINUTES = 30 * 60 * 1000; // 30 minutos em milissegundos
 const OSCILLATION_TIME_FRAME = 5 * 60 * 1000; // 5 minutos em milissegundos para detectar oscilação
 const siteStatusTimes = {}; // Armazena os tempos de inatividade dos sites
 
-// Função assíncrona para enviar mensagens ao Telegram
 async function sendTelegramMessage(message) {
     const telegramBotToken = "7472348745:AAGMqF50_Q4TAWyQgeJySb0tG-njguiJmrI";
     const telegramChatId = "-1002155037998";
@@ -26,7 +26,6 @@ async function sendTelegramMessage(message) {
     }
 }
 
-// Função para verificar o status de um site com tempo limite
 async function checkSiteStatus(url) {
     const timeout = 5000; // Tempo limite de 5 segundos
     const controller = new AbortController();
@@ -51,7 +50,6 @@ async function checkSiteStatus(url) {
     }
 }
 
-// Função assíncrona para buscar e atualizar o status dos sites
 async function fetchSitesStatus() {
     try {
         const response = await fetch('https://monitoramento-sites-api.onrender.com/checkSites');
@@ -92,8 +90,8 @@ async function fetchSitesStatus() {
 
             const row = document.createElement('tr');
             row.innerHTML = `
-                <td id="tabela-site">${site.url}</td>
-                <td id="tabela-status">
+                <td>${site.url}</td>
+                <td>
                     <span class="status-dot ${statusClass}"></span>
                     ${statusClass === 'status-yellow' ? 'Oscilando' : status}
                 </td>
@@ -120,7 +118,6 @@ async function fetchSitesStatus() {
     }
 }
 
-// Função assíncrona para adicionar um novo link
 async function addLink(event) {
     event.preventDefault();
 
