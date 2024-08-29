@@ -1,9 +1,7 @@
-// script.js
-
-const ALERT_DELAY_10_MINUTES = 10 * 60 * 1000; // 10 minutos em milissegundos
-const ALERT_DELAY_30_MINUTES = 30 * 60 * 1000; // 30 minutos em milissegundos
-const OSCILLATION_TIME_FRAME = 5 * 60 * 1000; // 5 minutos em milissegundos para detectar oscilação
-const siteStatusTimes = {}; // Armazena os tempos de inatividade dos sites
+const ALERT_DELAY_10_MINUTES = 10 * 60 * 1000;
+const ALERT_DELAY_30_MINUTES = 30 * 60 * 1000;
+const OSCILLATION_TIME_FRAME = 5 * 60 * 1000;
+const siteStatusTimes = {};
 
 async function sendTelegramMessage(message) {
     const telegramBotToken = "7472348745:AAGMqF50_Q4TAWyQgeJySb0tG-njguiJmrI";
@@ -27,7 +25,7 @@ async function sendTelegramMessage(message) {
 }
 
 async function checkSiteStatus(url) {
-    const timeout = 5000; // Tempo limite de 5 segundos
+    const timeout = 5000;
     const controller = new AbortController();
     const timeoutId = setTimeout(() => controller.abort(), timeout);
 
@@ -69,21 +67,17 @@ async function fetchSitesStatus() {
                 const previousStatus = previousStatusData.status;
 
                 if (status !== previousStatus) {
-                    // Se o status mudar dentro da janela de oscilação, marca como "Oscilando"
                     if (now - previousStatusData.time <= OSCILLATION_TIME_FRAME) {
-                        statusClass = 'status-yellow'; // Oscilando
+                        statusClass = 'status-yellow';
                         siteStatusTimes[site.url] = { status: 'Oscilando', time: now };
                     } else {
-                        // Se não estiver oscilando, atualiza o status e o tempo
                         statusClass = status === 'Online' ? 'status-green' : status === 'Offline' ? 'status-red' : 'status-yellow';
                         siteStatusTimes[site.url] = { status: status, time: now };
                     }
                 } else {
-                    // Mantém o status e a cor
                     statusClass = previousStatus === 'Online' ? 'status-green' : previousStatus === 'Offline' ? 'status-red' : 'status-yellow';
                 }
             } else {
-                // Se não houver status anterior, define o atual
                 statusClass = status === 'Online' ? 'status-green' : status === 'Offline' ? 'status-red' : 'status-yellow';
                 siteStatusTimes[site.url] = { status: status, time: now };
             }
@@ -107,7 +101,6 @@ async function fetchSitesStatus() {
                     siteStatusTimes[site.url].time = now;
                 }
             } else {
-                // Remove o tempo de inatividade se o site estiver online
                 if (status === 'Online') {
                     delete siteStatusTimes[site.url];
                 }
@@ -146,14 +139,9 @@ async function addLink(event) {
     }
 }
 
-// Adiciona um listener para o evento de submit do formulário
 document.getElementById('addLinkForm').addEventListener('submit', addLink);
 
-// Executa a função fetchSitesStatus imediatamente ao carregar a página
 fetchSitesStatus();
 
-// Intervalo para verificar o status dos sites (em milissegundos)
-const intervalMillis = 60000; // 1 minuto
-
-// Verifica o status dos sites com o intervalo de 1 minuto
+const intervalMillis = 60000;
 setInterval(fetchSitesStatus, intervalMillis);
