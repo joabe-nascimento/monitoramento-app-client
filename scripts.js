@@ -48,7 +48,6 @@ async function checkSiteStatus(url) {
 // Função assíncrona para buscar e atualizar o status dos sites
 async function fetchSitesStatus() {
     try {
-        // Faz uma requisição para o backend para obter o status dos sites
         const response = await fetch('https://monitoramento-sites-api.onrender.com/checkSites');
         const data = await response.json();
 
