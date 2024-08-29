@@ -92,6 +92,11 @@ th {
   background-color: #d9534f;
 }
 
+/* Nova classe para o status "Lento" */
+.status-yellow {
+  background-color: #f0ad4e;
+}
+
 form#addLinkForm {
   display: flex;
   justify-content: center;
