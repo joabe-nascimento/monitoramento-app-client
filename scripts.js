@@ -1,6 +1,7 @@
-// Variáveis para armazenar o tempo de inatividade
+// Variáveis para armazenar o tempo de inatividade e status de oscilação
 const ALERT_DELAY_10_MINUTES = 10 * 60 * 1000; // 10 minutos em milissegundos
 const ALERT_DELAY_30_MINUTES = 30 * 60 * 1000; // 30 minutos em milissegundos
+const OSCILLATION_TIME_FRAME = 5 * 60 * 1000; // 5 minutos em milissegundos para detectar oscilação
 const siteStatusTimes = {}; // Armazena os tempos de inatividade dos sites
 
 // Função assíncrona para enviar mensagens ao Telegram
@@ -61,41 +62,57 @@ async function fetchSitesStatus() {
 
         for (const site of data) {
             const status = await checkSiteStatus(site.url);
-            const statusClass = status === 'Online' ? 'status-green' : status === 'Lento' ? 'status-yellow' : 'status-red';
-            
+            let statusClass = '';
+
+            const now = Date.now();
+            const previousStatusData = siteStatusTimes[site.url];
+
+            if (previousStatusData) {
+                const previousStatus = previousStatusData.status;
+
+                if (status !== previousStatus) {
+                    // Se o status mudar dentro da janela de oscilação, marca como "Oscilando"
+                    if (now - previousStatusData.time <= OSCILLATION_TIME_FRAME) {
+                        statusClass = 'status-yellow'; // Oscilando
+                        siteStatusTimes[site.url] = { status: 'Oscilando', time: now };
+                    } else {
+                        // Se não estiver oscilando, atualiza o status e o tempo
+                        statusClass = status === 'Online' ? 'status-green' : status === 'Offline' ? 'status-red' : 'status-yellow';
+                        siteStatusTimes[site.url] = { status: status, time: now };
+                    }
+                } else {
+                    // Mantém o status e a cor
+                    statusClass = previousStatus === 'Online' ? 'status-green' : previousStatus === 'Offline' ? 'status-red' : 'status-yellow';
+                }
+            } else {
+                // Se não houver status anterior, define o atual
+                statusClass = status === 'Online' ? 'status-green' : status === 'Offline' ? 'status-red' : 'status-yellow';
+                siteStatusTimes[site.url] = { status: status, time: now };
+            }
+
             const row = document.createElement('tr');
             row.innerHTML = `
                 <td id="tabela-site">${site.url}</td>
                 <td id="tabela-status">
                     <span class="status-dot ${statusClass}"></span>
-                    ${status}
+                    ${statusClass === 'status-yellow' ? 'Oscilando' : status}
                 </td>
             `;
             siteTableBody.appendChild(row);
 
-            const now = Date.now();
-
             if (status === 'Offline' || status === 'Lento') {
-                if (!siteStatusTimes[site.url]) {
-                    siteStatusTimes[site.url] = { status: status, time: now };
-                } else {
-                    const statusData = siteStatusTimes[site.url];
-                    if (statusData.status === status) {
-                        if (now - statusData.time >= ALERT_DELAY_30_MINUTES) {
-                            sendTelegramMessage(`ALERTA CRÍTICO: O site ${site.url} está inacessível ou fora do ar há mais de 30 minutos!`);
-                            statusData.time = now; // Atualiza o tempo para evitar múltiplos alertas
-                        } else if (now - statusData.time >= ALERT_DELAY_10_MINUTES) {
-                            sendTelegramMessage(`AVISO: O site ${site.url} está inacessível ou fora do ar há mais de 10 minutos.`);
-                            statusData.time = now; // Atualiza o tempo para evitar múltiplos alertas
-                        }
-                    } else {
-                        // Atualiza o status e o tempo quando há uma mudança
-                        siteStatusTimes[site.url] = { status: status, time: now };
-                    }
+                if (now - siteStatusTimes[site.url].time >= ALERT_DELAY_30_MINUTES) {
+                    sendTelegramMessage(`ALERTA CRÍTICO: O site ${site.url} está inacessível ou fora do ar há mais de 30 minutos!`);
+                    siteStatusTimes[site.url].time = now;
+                } else if (now - siteStatusTimes[site.url].time >= ALERT_DELAY_10_MINUTES) {
+                    sendTelegramMessage(`AVISO: O site ${site.url} está inacessível ou fora do ar há mais de 10 minutos.`);
+                    siteStatusTimes[site.url].time = now;
                 }
             } else {
-                // Se o status do site voltar a ser "Online", remove o tempo de inatividade
-                delete siteStatusTimes[site.url];
+                // Remove o tempo de inatividade se o site estiver online
+                if (status === 'Online') {
+                    delete siteStatusTimes[site.url];
+                }
             }
         }
     } catch (error) {
