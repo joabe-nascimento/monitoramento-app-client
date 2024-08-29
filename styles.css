@@ -176,3 +176,41 @@ footer {
     font-size: 0.8em;
   }
 }
+
+/* styles.css */
+
+.status-dot {
+    display: inline-block;
+    width: 10px;
+    height: 10px;
+    border-radius: 50%;
+    margin-right: 5px;
+}
+
+.status-green {
+    background-color: green;
+}
+
+.status-yellow {
+    background-color: yellow;
+}
+
+.status-red {
+    background-color: red;
+}
+
+table {
+    width: 100%;
+    border-collapse: collapse;
+}
+
+th, td {
+    border: 1px solid #ddd;
+    padding: 8px;
+    text-align: left;
+}
+
+th {
+    background-color: #f2f2f2;
+}
+
