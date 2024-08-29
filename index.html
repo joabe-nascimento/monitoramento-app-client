@@ -1,55 +1,48 @@
 <!DOCTYPE html>
 <html lang="en">
-<head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Monitoramento de Sites</title>
-    <style>
-        table {
-            width: 100%;
-            border-collapse: collapse;
-        }
-        th, td {
-            padding: 8px;
-            text-align: left;
-            border-bottom: 1px solid #ddd;
-        }
-        tr:hover {background-color: #f5f5f5;}
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <link rel="shortcut icon" href="./assets/favicon.ico" type="image/x-icon" />
+    <title>Grupo Nobre - Validador de Sites</title>
+    <link rel="stylesheet" href="styles.css" />
+  </head>
 
-        .status-dot {
-            height: 10px;
-            width: 10px;
-            border-radius: 50%;
-            display: inline-block;
-            margin-right: 8px;
-        }
+  <body>
+    <nav>
+      <img src="./assets/gn_branca_curta.png" alt="logo-gn" id="imagem-gn" />
+    </nav>
 
-        .status-green {
-            background-color: green;
-        }
-
-        .status-yellow {
-            background-color: yellow;
-        }
-
-        .status-red {
-            background-color: red;
-        }
-    </style>
-</head>
-<body>
-    <h1>Monitoramento de Sites</h1>
-    <table>
+    <div class="container">
+      <table id="siteTable">
         <thead>
-            <tr>
-                <th>Site</th>
-                <th>Status</th>
-            </tr>
+          <tr>
+            <th id="site">Site</th>
+            <th id="status">Status</th>
+          </tr>
         </thead>
         <tbody id="siteTableBody">
-            <!-- Os dados dos sites serão inseridos aqui dinamicamente -->
+        
         </tbody>
-    </table>
+      </table>
+
+      <form id="addLinkForm">
+        <input
+          type="text"
+          id="linkInput"
+          placeholder="Insira um novo link"
+          required
+        />
+        <button type="submit">Add Link</button>
+      </form>
+    </div>
+
+    <footer>
+      <p id="copy">
+        &copy; 2024 T.I da União Médica. Todos os direitos reservados.
+      </p>
+    </footer>
+
     <script src="scripts.js"></script>
-</body>
+  </body>
 </html>
