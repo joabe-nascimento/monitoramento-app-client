@@ -24,7 +24,7 @@ async function sendTelegramMessage(message) {
 async function fetchSitesStatus() {
     try {
         // Faz uma requisição para o backend para obter o status dos sites
-        const response = await fetch('https://monitoramento-sites-api.onrender.com/checkSites');
+        const response = await fetch('https://monitoramento-sites-api-sxoo.onrender.com/checkSites');
 
         // Converte a resposta para JSON
         const data = await response.json();
@@ -74,7 +74,7 @@ async function addLink(event) {
 
     try {
         // Faz uma requisição POST para adicionar o novo link
-        const response = await fetch('https://monitoramento-sites-api.onrender.com/addLink', {
+        const response = await fetch('https://monitoramento-sites-api-sxoo.onrender.com/addLink', {
             method: 'POST',
             headers: {
                 'Content-Type': 'application/json'
